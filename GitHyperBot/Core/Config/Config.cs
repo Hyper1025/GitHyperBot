@@ -5,6 +5,11 @@ namespace GitHyperBot.Core.Config
 {
     class Config
     {
+        //  <summary>
+        //  Clase responsável por arquivos de configuração
+        //  base do bot, como token e prefixo de comando
+        //  </summary>
+
         //  Pasta
         private const string ConfigFolder = "Resources";
         //  Arquivo de config
