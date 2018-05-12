@@ -13,7 +13,7 @@ Um simples bot de código aberto
 ## Built With
 * [.NET Core 2.0](https://docs.microsoft.com/en-us/dotnet/core/) - Platform used
 * [Discord .NET](https://github.com/RogueException/Discord.Net) - Discord API library
-E claro, muito amor :heart: 
+> E claro, muito amor :heart: 
 
 ## Contributing
 Você pode contribuir para esse querido **bot**, aqui está a [documentação](https://docs.stillu.cc/) da **API** do discord utilizada no projeto
