@@ -10,8 +10,8 @@ Um simples bot de código aberto
 ## O ambiente
 * O diretório raiz desse projeto, é o que contém `GitHyperBot.csproj`, isso é o arquivo de solução do Visual Studio.
 
-## Feito com
-* [.NET Core 2.0](https://docs.microsoft.com/en-us/dotnet/core/) - Platforma usada
+## Built With
+* [.NET Core 2.0](https://docs.microsoft.com/en-us/dotnet/core/) - Platform used
 * [Discord .NET](https://github.com/RogueException/Discord.Net) - Discord API library
 > E claro, muito amor :heart: 
 
