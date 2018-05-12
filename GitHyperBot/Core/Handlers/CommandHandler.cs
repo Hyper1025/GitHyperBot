@@ -5,8 +5,11 @@ using Discord.WebSocket;
 
 namespace GitHyperBot.Core.Handlers
 {
+    //  <summary>
     //  Essa classe será a responsável por pegar
     //  os comandos feitos pelos usuários
+    //  </summary>
+
     public class CommandHandler
     {
         //  Atribuimos _client como um DiscordSocketClient
