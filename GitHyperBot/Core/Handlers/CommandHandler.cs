@@ -21,7 +21,14 @@ namespace GitHyperBot.Core.Handlers
         public async Task InitializeAsync(DiscordSocketClient client)
         {
             _client = client;
-            _service = new CommandService();
+
+            //  Criamos um command service para os comandos
+            _service = new CommandService(new CommandServiceConfig  //  Sobrecarregamos o método com "CommandServiceConfig"
+            {                                                       //  Isso nos permitirá configurar o Command Service
+
+                CaseSensitiveCommands = false,  //  Os comandos não devem fazer distinção entre maiúsculas e minúsculas 
+                DefaultRunMode = RunMode.Async  //  Executamos os comandos de forma assíncrona 
+            });
 
             await _service.AddModulesAsync(Assembly.GetEntryAssembly());
             _client.MessageReceived += HandleCommandAsync;
@@ -30,10 +37,8 @@ namespace GitHyperBot.Core.Handlers
         private async Task HandleCommandAsync(SocketMessage s)
         {
             //  Lançamos uma SocketMessage para um SocketUserMessage
-            var msg = s as SocketUserMessage;
-            
             //  Verificamos se a mensagem não é nula
-            if (msg == null) return;
+            if (!(s is SocketUserMessage msg)) return;
 
             //  Agora criamos uma váriavel chamada "context"
             //  Que basicamente é um pacote de informações
