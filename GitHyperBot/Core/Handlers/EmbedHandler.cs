@@ -1,10 +1,11 @@
 ﻿using Discord;
+using Discord.WebSocket;
 
 namespace GitHyperBot.Core.Handlers
 {
     public class EmbedHandler
     {
-        public static Embed CriarEmbed(string title, string body, EmbedMessageType type, bool withTimeStamp = true)
+        public static Embed CriarEmbed(string title, string body, EmbedMessageType type, bool withTimeStamp = true, SocketUser user = null, bool withAuthor = true)
         {
             var embed = new EmbedBuilder();
             embed.WithTitle(title);
@@ -43,9 +44,18 @@ namespace GitHyperBot.Core.Handlers
                     embed.WithColor(new Color(255, 191, 0));
                     embed.WithThumbnailUrl("https://images.emojiterra.com/twitter/512px/26a0.png");
                     break;
+                case EmbedMessageType.GoldGain:
+                    embed.WithColor(new Color(244, 217, 66));
+                    embed.WithThumbnailUrl("https://i.imgur.com/AT7G9N2.png");
+                    break;
                 default:
                     embed.WithColor(new Color(178, 178, 178));
                     break;
+            }
+
+            if (user != null && withAuthor)
+            {
+                embed.WithAuthor(user.Username, user.GetAvatarUrl());
             }
 
             if (withTimeStamp)
@@ -66,5 +76,6 @@ namespace GitHyperBot.Core.Handlers
         Confused = 4,
         AccessDenied = 5,
         Warning = 6,
+        GoldGain = 7
     }
 }
