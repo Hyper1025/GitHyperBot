@@ -6,7 +6,8 @@
         public ulong GuildId { get; set; }
 
         //  Maximo de warns
-        public uint MaxWarning { get; set; }
+        //  Valor padrão definido como 4
+        public uint MaxWarning { get; set; } = 4;
 
         //  Id do chat geral
         public ulong IdChatGeral { get; set; }
@@ -40,7 +41,7 @@
         //  Imagem ou Gif URL
         public string BoasVindasUrl { get; set; }
 
-        //  <PRIVADO>
+        //  <Mensagem direta>
         //  Mensagem de boas vindas
         // (Liga, Desliga)
         public bool BoasVindasPvBool { get; set; }
