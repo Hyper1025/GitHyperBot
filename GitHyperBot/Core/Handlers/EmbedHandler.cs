@@ -15,30 +15,27 @@ namespace GitHyperBot.Core.Handlers
             {
                 case EmbedMessageType.Info:
                     embed.WithColor(new Color(52, 152, 219));
-                    embed.WithThumbnailUrl(
-                        "http://www.hey.fr/fun/emoji/android/en/icon/android/20-emoji_android_information_source.png");
+                    embed.WithThumbnailUrl("http://www.hey.fr/fun/emoji/android/en/icon/android/20-emoji_android_information_source.png");
                     break;
                 case EmbedMessageType.Success:
                     embed.WithColor(new Color(22, 160, 133));
-                    embed.WithThumbnailUrl(
-                        "http://www.emoji.co.uk/files/twitter-emojis/symbols-twitter/11160-white-heavy-check-mark.png");
+                    embed.WithThumbnailUrl("http://www.emoji.co.uk/files/twitter-emojis/symbols-twitter/11160-white-heavy-check-mark.png");
                     break;
                 case EmbedMessageType.Error:
                     embed.WithColor(new Color(192, 57, 43));
-                    embed.WithThumbnailUrl(
-                        "https://cdn.iconscout.com/public/images/icon/free/png-512/dizzy-face-cross-error-emoji-3a5cd2ef4699d800-512x512.png");
+                    embed.WithThumbnailUrl("https://cdn.iconscout.com/public/images/icon/free/png-512/dizzy-face-cross-error-emoji-3a5cd2ef4699d800-512x512.png");
                     break;
                 case EmbedMessageType.Exception:
                     embed.WithColor(new Color(230, 126, 34));
                     break;
                 case EmbedMessageType.Confused:
                     embed.WithColor(new Color(255, 191, 0));
-                    embed.WithThumbnailUrl("https://media3.giphy.com/media/CaiVJuZGvR8HK/giphy.gif");
+                    embed.WithThumbnailUrl("https://i.imgur.com/QpG1cTI.gif");
+                    //embed.WithThumbnailUrl("https://media3.giphy.com/media/CaiVJuZGvR8HK/giphy.gif");
                     break;
                 case EmbedMessageType.AccessDenied:
                     embed.WithColor(new Color(192, 57, 43));
-                    embed.WithThumbnailUrl(
-                        "https://vignette.wikia.nocookie.net/undertale-rp/images/0/0d/Access_Denied.png");
+                    embed.WithThumbnailUrl("https://vignette.wikia.nocookie.net/undertale-rp/images/0/0d/Access_Denied.png");
                     break;
                 case EmbedMessageType.Warning:
                     embed.WithColor(new Color(255, 191, 0));
@@ -47,6 +44,10 @@ namespace GitHyperBot.Core.Handlers
                 case EmbedMessageType.GoldGain:
                     embed.WithColor(new Color(244, 217, 66));
                     embed.WithThumbnailUrl("https://i.imgur.com/AT7G9N2.png");
+                    break;
+                case EmbedMessageType.Config:
+                    embed.WithColor(new Color(188, 188, 188));
+                    embed.WithThumbnailUrl("https://images.emojiterra.com/twitter/512px/2699.png");
                     break;
                 default:
                     embed.WithColor(new Color(178, 178, 178));
@@ -76,6 +77,7 @@ namespace GitHyperBot.Core.Handlers
         Confused = 4,
         AccessDenied = 5,
         Warning = 6,
-        GoldGain = 7
+        GoldGain = 7,
+        Config = 8,
     }
 }
