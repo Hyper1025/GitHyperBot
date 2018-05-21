@@ -63,8 +63,16 @@ namespace GitHyperBot.Core.Handlers
                 //  Verificamos se ocorreu algum erro no comando
                 if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
                 {
-                    // <AINDA POR IMPLEMENTAR>
-                    await context.Channel.SendFileAsync(result.ErrorReason);
+                    //  Entra aqui, caso retorne um erro, porém não um erro de comando desconhecido
+                    await context.Channel.SendMessageAsync("",false,
+                        EmbedHandler.CriarEmbed("Erro",$"``{result.ErrorReason}``",EmbedMessageType.Error,false,context.User));
+                }
+                else if (result.Error == CommandError.UnknownCommand)
+                {
+                    //  Caso resulte em um erro de comando desconhecido, entra aqui
+                    await context.Channel.SendMessageAsync("", false,
+                        EmbedHandler.CriarEmbed("Comando Desconhecido", $"O comando ``{msg.Content}`` não existe", EmbedMessageType.Confused,
+                            false, context.User));
                 }
             }
         }
