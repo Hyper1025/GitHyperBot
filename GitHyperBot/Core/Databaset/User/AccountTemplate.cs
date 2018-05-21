@@ -14,6 +14,9 @@ namespace GitHyperBot.Core.Databaset.User
         //  Já adicionamos um valor padrão, e removemos dois dias do dia atual
         public DateTime LastDaily { get; set; } = DateTime.UtcNow.AddDays(-2);
 
+        //  Possivel função a ser adicionada
+        //public ulong Registrados { get; set; }
+
         //  Xp para sistema de experiência
         public uint Xp { get; set; }
 
