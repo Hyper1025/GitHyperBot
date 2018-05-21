@@ -27,6 +27,9 @@
         //  Id mensagem regras
         public ulong IdMsgRegras { get; set; }
 
+        //  Url servidor
+        public string UrlServer { get; set; }
+
         //  <CHAT GERAL>
         //  Mensagem de boas vindas chat geral
         //  (Liga, Desliga)
