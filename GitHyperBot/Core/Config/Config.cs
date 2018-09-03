@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace GitHyperBot.Core.Config
 {
-    class Config
+    internal class Config
     {
         //  <summary>
         //  Clase responsável por arquivos de configuração
@@ -76,5 +76,7 @@ namespace GitHyperBot.Core.Config
     {
         public string Token { get; set; }
         public string CmdPrefix { get; set; }
+        public string GiphyApiKey { get; set; }
+        public string LoLApiKey { get; set; }
     }
 }

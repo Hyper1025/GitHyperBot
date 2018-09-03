@@ -1,62 +1,138 @@
 ﻿using System;
-using System.Linq;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
+using GitHyperBot.Core;
+using GitHyperBot.Core.Databaset.Server;
 using GitHyperBot.Core.Handlers;
+using GitHyperBot.Modules.Admin.Dependencies;
+using GitHyperBot.Modules.Admin.Dependencies.json;
+using GitHyperBot.Modules.Help.Dependencies;
 
 namespace GitHyperBot.Modules.Admin
 {
     public class Admin : ModuleBase<SocketCommandContext>
     {
-        [Command("Limpar"), Remarks("Purges An Amount Of Messages")]
-        [RequireUserPermission(GuildPermission.ManageMessages), RequireBotPermission(ChannelPermission.ManageMessages)]
-        public async Task LimparChaTask(uint quantidade = 0)
+        [Command("Game")]
+        [Alias("SetGame")]
+        [Summary("Altera o que o bot está jogando atualmente.")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [CmdCategory(Categoria = CmdCategory.Administração)]
+        public async Task SetGameTask([Remainder] string nomeDoJogo)
         {
-            //  Verificamos se foi informado um número de mensagens a serem deletadas
-            if (quantidade == 0)
+            await Context.Client.SetGameAsync(nomeDoJogo);
+            await ReplyAsync("",false,EmbedHandler.CriarEmbed("Certo...",$"Jogo alterado para {nomeDoJogo}",EmbedMessageType.Config));
+        }
+
+        [Command("RegrasCriadas")]
+        [Summary("Cria uma embed para o usuário concordar que leu os termos")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [CmdCategory(Categoria = CmdCategory.Administração)]
+        internal async Task RegrasCriadasTask()
+        {
+            var guildAccount = GuildsMannanger.GetGuild(Context.Guild);
+
+            if (guildAccount.IdRoleRegras == 0)
             {
-                //  Caso o valor seja igual a 0
-                var msgErro = await Context.Channel.SendMessageAsync("",false,EmbedHandler.CriarEmbed("", 
-                    "Você precisa mensurar um número maior que _0_, para serem deletadas",EmbedMessageType.Info,false,Context.User));
-                await Task.Delay(5000);
-                await msgErro.DeleteAsync();
-                return; //  Retornamos
+                await ReplyAsync("", false,
+                    EmbedHandler.CriarEmbed("Opa...",
+                        "Não posso fazer isso para você, se você ainda não definiu a role que será dada quando o usuário aceitar os as regras.\nFaça isso usando...",
+                        EmbedMessageType.Info));
+                await HelpService.HelpCommandTask(Context, "GC DefinirRoleRegras");
+                return;
             }
 
-            //  Capturamos o número de mensagens que precisamos apagar
-            var msgs = await Context.Channel.GetMessagesAsync((int)quantidade + 1).Flatten();
-            //  Desse número, selecionamos as que foram criadas até 14 dias da data atual
-            var resultado = msgs.Where(x => x.CreatedAt >= DateTimeOffset.UtcNow.Subtract(TimeSpan.FromDays(14)));
-            //  Criamos uma variável enumerável, só para contar os itens retornados da variável resultado
-            //  E a convertemos em uma lista
-            var enumerable = resultado.ToList();
-            //  Contamos o número de intens na variável enumerable, que será o número de mensagenss apagadas com sucesso
-            var numero = enumerable.ToList().Count;
-            //  Deletamos as mensagens
-            await Context.Channel.DeleteMessagesAsync(enumerable);
+            var m = await Context.Channel.SendMessageAsync("", false,
+                EmbedHandler.CriarEmbed("Regras",
+                    "Ao clicar em :white_check_mark:, você concorda que leu as regras e está de acordo com elas. O não cumprimento das mesmas resultará em medidas cabíveis conforme a situação.",
+                    EmbedMessageType.Info));
+            await m.AddReactionAsync(new Emoji("✅"));
 
-            //  Isso só serve para uma resposta mais congruente com o resultado da operação
-            //  Caso a quantidade solicitada, for igual ao número de mensagens apagadas
-            if (quantidade == numero)
+            guildAccount.IdMsgRegras = m.Id;
+            GuildsMannanger.SaveGuilds();
+
+        }
+
+        [Command("Reiniciar")]
+        [Summary("Reinicia o bot")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [CmdCategory(Categoria = CmdCategory.Administração)]
+        internal async Task ResetTask()
+        {
+            //var guildAccount = GuildsMannanger.GetGuild(Context.Guild);
+            //await ReplyAsync("", false, EmbedHandler.CriarEmbed("Reiniciando", "Isso não deve levar mais do que 30 segundos",EmbedMessageType.Info));
+
+            try
             {
-                //  Retornamos uma mensagem de sucesso dizendo que todas as tantas mensangens foram apagadas
-                //  Essa mensagem será apagada em 5 segundos
-                var msgSucesso = await ReplyAsync("", false, EmbedHandler.CriarEmbed("Deletadas", $"Certo, deletei todas as {quantidade} mensagens", EmbedMessageType.Success, false, Context.User));
-                await Task.Delay(5000);
-                await msgSucesso.DeleteAsync();
+                var location = Assembly.GetExecutingAssembly().Location;
+                var exe = location.Replace(".dll", ".exe");
+
+                if (File.Exists(exe))
+                {
+                    Process.Start($"{exe}");
+                    await ReplyAsync("", false, EmbedHandler.CriarEmbed("Sucesso", "Iniciando...\n" +
+                                                                                   "Por favor, aguarde um momento.", EmbedMessageType.Success));
+                    await Global.Client.LogoutAsync();
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    await ReplyAsync("", false, EmbedHandler.CriarEmbed("Ixi...", "Não encontrei o arquivo...\n" +
+                                                                                   $"```{exe}```\n" +
+                                                                                  $"Não foi encontrado", EmbedMessageType.Success));
+                }
             }
-            else
+            catch (Exception e)
             {
-                //  Caso a quantidade solicitada, for diferente do número de mensagens apagadas
-                //  Retornamos uma outra mensagem para o usuário, explicando o que aconteceu...
-                //  Essa mensagem é apagada em 10 segundos, para o usuário ler tranquilamente...
-                var msgSemiSucesso = await ReplyAsync("", false, EmbedHandler.CriarEmbed("Deletadas", $"Deletei **{numero - 1}, das {quantidade}...**\n" +
-                                                                               $"**{quantidade - numero + 1} não foram deletadas**, devido a terem sido criadas a mais de 14 dias atrás.", EmbedMessageType.Success, false, Context.User));
-                await Task.Delay(10000);
-                await msgSemiSucesso.DeleteAsync();
+                await ReplyAsync("", false, EmbedHandler.CriarEmbed("Hiiii azedou", $"Não foi possível reiniciar ```{e}```", EmbedMessageType.Error));
+                throw;
             }
         }
 
+#if true
+        [Command("Spam")]
+        [Summary("Envia uma embed no privado de cada usuário")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [CmdCategory(Categoria = CmdCategory.Administração)]
+        internal async Task SpamarPrivadoTask([Remainder] string json = null)
+        {
+            await Context.Message.DeleteAsync();
+            if (json == null)
+            {
+                await ReplyAsync("Por favor, me envie um json no seguinte formato...\nVocê pode user {mencionar} para mencionar o usuário que receberá a mensagem", false,
+                    EmbedHandler.CriarEmbed("Json",
+                        "{\n \"Mensagem\": \"Digite aqui a mensagem que aparecerá fora da embed\",\n \"Titulo\": \"Digite aqui o título\",\n  \"Descrição\": \"Digite aqui a descrição\",\n  \"ImagemUrl\":\"UrlDaImagem.jpg\"\n}",
+                        EmbedMessageType.Info, false));
+                return;
+            }
+
+            await SpamService.SpamPrivado((SocketGuildUser)Context.User, json, (SocketTextChannel)Context.Channel);
+        }
+
+        [Command("TestSpam")]
+        [Summary("Mostra como fica a embed do spam")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [CmdCategory(Categoria = CmdCategory.Administração)]
+        internal async Task TestarSpamTask([Remainder] string json = null)
+        {
+            if (json == null)
+            {
+                await ReplyAsync("Por favor, me envie um json no seguinte formato", false,
+                    EmbedHandler.CriarEmbed("Json",
+                        "{\n \"Mensagem\": \"Digite aqui a mensagem que aparecerá fora da embed\",\n \"Titulo\": \"Digite aqui o título\",\n  \"Descrição\": \"Digite aqui a descrição\",\n  \"ImagemUrl\":\"UrlDaImagem.jpg\"\n}",
+                        EmbedMessageType.Info, false));
+                return;
+            }
+            var spamMessage = SpamMessage.FromJson(json);
+
+            await ReplyAsync("Assim ficará a mensagem de spam:\n" +
+                             $"{spamMessage.Mensagem.Replace("{mencionar}", Context.User.Mention)}", false,
+                SpamService.RetornarEmbedSpam((SocketGuildUser)Context.User, json, (SocketGuildUser)Context.User));
+        }
+#endif
     }
 }

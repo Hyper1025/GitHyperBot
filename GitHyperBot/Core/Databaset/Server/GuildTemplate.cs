@@ -2,7 +2,7 @@
 {
     public class GuildTemplate
     {
-        //  Id do servidor
+        //  Id do servidor <Key única>
         public ulong GuildId { get; set; }
 
         //  Maximo de warns
@@ -27,8 +27,25 @@
         //  Id mensagem regras
         public ulong IdMsgRegras { get; set; }
 
-        //  Url servidor
-        public string UrlServer { get; set; }
+        //  Role Regras
+        public ulong IdRoleRegras { get; set; }
+
+        //  Role Registrado
+        public ulong IdRoleRegistrado { get; set; }
+
+        //  Role Não registrado
+        public ulong IdRoleSemRegistro { get; set; }
+
+        //  Role Masculino
+        public ulong IdRoleMasculino { get; set; }
+
+        //  Role Feminino
+        public ulong IdRoleFemenino { get; set; }
+
+        public bool TopicoChatGeralBool { get; set; }
+        public string TopicoChatGeral { get; set; } = "{contador}";
+
+        #region ChatGeral
 
         //  <CHAT GERAL>
         //  Mensagem de boas vindas chat geral
@@ -44,6 +61,13 @@
         //  Imagem ou Gif URL
         public string BoasVindasUrl { get; set; }
 
+        //  Tumb do usuário
+        public bool BoasVindasTumbUsuario { get; set; }
+
+        #endregion
+
+        #region MensagemPrivada
+
         //  <Mensagem direta>
         //  Mensagem de boas vindas
         // (Liga, Desliga)
@@ -57,6 +81,9 @@
 
         //  Imagem ou Gif URL
         public string BoasVindasPvUrl { get; set; }
+
+        //  Tumb do usuário
+        public bool BoasVindasPvTumbUsuario { get; set; }
 
         //  Campo 1
         //  Título
@@ -78,5 +105,9 @@
 
         //  Rodapé
         public string BoasVindasPvFooter { get; set; }
+
+        //  Delay auto-role
+        public bool DelayAutoRole { get; set; }
+        #endregion
     }
 }

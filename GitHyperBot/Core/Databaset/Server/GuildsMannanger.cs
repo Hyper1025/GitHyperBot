@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Discord.WebSocket;
-using GitHyperBot.Core.DataManipulation;
+using GitHyperBot.Core.Databaset.DataManipulation;
 
 namespace GitHyperBot.Core.Databaset.Server
 {
@@ -49,11 +49,9 @@ namespace GitHyperBot.Core.Databaset.Server
             var result = from g in Guilds where g.GuildId == id select g;
 
             //  Atribuimos ela a variável
-            var guild = result.FirstOrDefault();
-
             //  Verificamos se existe a conta
             //  Caso nulo, criamos a conta
-            if (guild == null) guild = CreateUserAccount(id);
+            var guild = result.FirstOrDefault() ?? CreateUserAccount(id);
 
             //  Retornamos a conta
             return guild;

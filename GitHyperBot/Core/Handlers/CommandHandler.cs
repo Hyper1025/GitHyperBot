@@ -1,7 +1,10 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
+using GitHyperBot.Core.Services;
+using GitHyperBot.Modules.Help.Dependencies;
 
 namespace GitHyperBot.Core.Handlers
 {
@@ -25,10 +28,12 @@ namespace GitHyperBot.Core.Handlers
             //  Criamos um command service para os comandos
             _service = new CommandService(new CommandServiceConfig  //  Sobrecarregamos o método com "CommandServiceConfig"
             {                                                       //  Isso nos permitirá configurar o Command Service
-
                 CaseSensitiveCommands = false,  //  Os comandos não devem fazer distinção entre maiúsculas e minúsculas 
-                DefaultRunMode = RunMode.Async  //  Executamos os comandos de forma assíncrona 
+                DefaultRunMode = RunMode.Async,  //  Executamos os comandos de forma assíncrona 
             });
+
+            //  Isso servirá para acessar o CommandService de qualquer classe
+            Global.CommandService = _service;
 
             await _service.AddModulesAsync(Assembly.GetEntryAssembly());
             _client.MessageReceived += HandleCommandAsync;
@@ -48,31 +53,59 @@ namespace GitHyperBot.Core.Handlers
             //  Definimos uma váriavel que servirá como
             //  Indicador da posição do prefixo do bot
             //  Para que uma mensagem seja considerada um comando
-            int argPos = 0;
+            var argPos = 0;
 
             //  Verificamos as condições de prefixo
             if (msg.HasStringPrefix(Config.Config.Bot.CmdPrefix, ref argPos) || msg.HasMentionPrefix(_client.CurrentUser,ref argPos))
             {
                 //  Se forem válidas prosseguimos
-
                 //  O trecho "await _service.ExecuteAsync(context, argPos);"
                 //  Básicamente executa os comandos
                 //  Atribuimos a váriavel "result", para podermos nos referenciar a eventos dele
                 var result = await _service.ExecuteAsync(context, argPos);
 
+                //  Log cmd
+                await Logger.ConsoleLogComGuild(context.Guild, context.User.Username, context.Message.Content, ConsoleColor.White);
+
+                //  Sómente para efeito de indicação para o usuário
+                await context.Channel.TriggerTypingAsync();
+
                 //  Verificamos se ocorreu algum erro no comando
-                if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
+                if (!result.IsSuccess)
                 {
-                    //  Entra aqui, caso retorne um erro, porém não um erro de comando desconhecido
-                    await context.Channel.SendMessageAsync("",false,
-                        EmbedHandler.CriarEmbed("Erro",$"``{result.ErrorReason}``",EmbedMessageType.Error,false,context.User));
-                }
-                else if (result.Error == CommandError.UnknownCommand)
-                {
-                    //  Caso resulte em um erro de comando desconhecido, entra aqui
-                    await context.Channel.SendMessageAsync("", false,
-                        EmbedHandler.CriarEmbed("Comando Desconhecido", $"O comando ``{msg.Content}`` não existe", EmbedMessageType.Confused,
-                            false, context.User));
+                    if (result.Error != null)
+                        switch (result.Error.Value)
+                        {
+                            case CommandError.BadArgCount:
+                                var commandInfo = HelpService.GetCommandInfo(context, argPos);
+                                var uso = HelpService.GetCmdUsage(commandInfo);
+                                await context.Channel.SendMessageAsync("Opa!", false,
+                                    EmbedHandler.CriarEmbed($"Usando {commandInfo.Name}",
+                                        $"{uso}", 
+                                        EmbedMessageType.Info, false,context.User));
+                                break;
+                            case CommandError.UnknownCommand:
+                                await context.Channel.SendMessageAsync("", false,
+                                    EmbedHandler.CriarEmbed("Opa!", $"O comando ``{msg.Content}`` não existe", 
+                                        EmbedMessageType.Info, false));
+                                break;
+                            case CommandError.UnmetPrecondition:
+                                await context.Channel.SendMessageAsync("", false,
+                                    EmbedHandler.CriarEmbed("Opa!", $"Você não tem permissão para executar esse comando ``{msg.Content}``", 
+                                        EmbedMessageType.AccessDenied, false));
+                                break;
+                            case CommandError.Exception:
+                                await context.Channel.SendMessageAsync("", false,
+                                    EmbedHandler.CriarEmbed("É...",
+                                        "Não foi possível executar esse comando, tente novamente mais tarde.",
+                                        EmbedMessageType.Error, false));
+                                break;
+                            default:
+                                await context.Channel.SendMessageAsync("", false,
+                                    EmbedHandler.CriarEmbed("ERRO!", $"Tem algo bem errado ```{result.ErrorReason}```",
+                                        EmbedMessageType.Error, false));
+                                break;
+                        }
                 }
             }
         }

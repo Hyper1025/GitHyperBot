@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Discord.WebSocket;
-using GitHyperBot.Core.DataManipulation;
+using GitHyperBot.Core.Databaset.DataManipulation;
 
 namespace GitHyperBot.Core.Databaset.User
 {
@@ -34,43 +34,41 @@ namespace GitHyperBot.Core.Databaset.User
         }
 
         //  Isso é uma camada de "tradução" entre o usuário e o ID
-        public static AccountTemplate GetAccount(SocketUser user)
+        public static AccountTemplate GetAccount(SocketUser user, SocketGuild guild)
         {
-            return GetOrCreateAccount(user.Id);
+            return GetOrCreateAccount(user.Id, guild.Id);
         }
 
         //  Obtém todas contas
-        internal static List<AccountTemplate> GetAllAccounts()
-        {
-            return Accounts.ToList();
-        }
+        //internal static List<AccountTemplate> GetAllAccounts()
+        //{
+        //    return Accounts.ToList();
+        //}
 
         //  Obtém ou cria uma conta
-        private static AccountTemplate GetOrCreateAccount(ulong id)
+        private static AccountTemplate GetOrCreateAccount(ulong id, ulong guildId)
         {
             //  Procuramos pela conta
             //  Onde a conta selecionada deve ser a que
             //  O ID do arquivo e o ID solicitado sejam iguais
             //  Ao encontrar a conta, selecionamos ela
-            var result = from a in Accounts where a.UserId == id select a;
+            var result = from a in Accounts where a.UserId == $"{id}-{guildId}" select a;
 
             //  Atribuimos ela a variável
-            var account = result.FirstOrDefault();
-
             //  Verificamos se existe a conta
             //  Caso nulo, criamos a conta
-            if (account == null) account = CreateUserAccount(id);
+            var account = result.FirstOrDefault() ?? CreateUserAccount(id,guildId);
 
             //  Retornamos a conta
             return account;
         }
 
         //  Método para criar conta não existente
-        private static AccountTemplate CreateUserAccount(ulong id)
+        private static AccountTemplate CreateUserAccount(ulong id, ulong guildId)
         {
             var newAccount = new AccountTemplate()
             {
-                UserId = id
+                UserId = $"{id}-{guildId}"
             };
 
             Accounts.Add(newAccount);

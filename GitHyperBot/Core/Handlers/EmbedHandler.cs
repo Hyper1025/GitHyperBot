@@ -1,83 +1,266 @@
-﻿using Discord;
+﻿using System;
+using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
+using GitHyperBot.Core.Databaset.Server;
 
 namespace GitHyperBot.Core.Handlers
 {
     public class EmbedHandler
     {
-        public static Embed CriarEmbed(string title, string body, EmbedMessageType type, bool withTimeStamp = true, SocketUser user = null, bool withAuthor = true)
+        internal static Embed CriarEmbed(string título, string descrição, EmbedMessageType tipo, bool comTempo = true, SocketUser usuário = null, bool comAutor = true)
         {
             var embed = new EmbedBuilder();
-            embed.WithTitle(title);
-            embed.WithDescription(body);
 
-            switch (type)
+            embed.WithDescription(descrição);
+
+            switch (tipo)
             {
                 case EmbedMessageType.Info:
-                    embed.WithColor(new Color(52, 152, 219));
-                    embed.WithThumbnailUrl("http://www.hey.fr/fun/emoji/android/en/icon/android/20-emoji_android_information_source.png");
+                    embed.WithTitle($":information_source: {título}")
+                        .WithColor(new Color(52, 152, 219));
                     break;
                 case EmbedMessageType.Success:
-                    embed.WithColor(new Color(22, 160, 133));
-                    embed.WithThumbnailUrl("http://www.emoji.co.uk/files/twitter-emojis/symbols-twitter/11160-white-heavy-check-mark.png");
+                    embed.WithTitle($":white_check_mark: {título}")
+                        .WithColor(new Color(22, 160, 133));
                     break;
                 case EmbedMessageType.Error:
-                    embed.WithColor(new Color(192, 57, 43));
-                    embed.WithThumbnailUrl("https://cdn.iconscout.com/public/images/icon/free/png-512/dizzy-face-cross-error-emoji-3a5cd2ef4699d800-512x512.png");
-                    break;
-                case EmbedMessageType.Exception:
-                    embed.WithColor(new Color(230, 126, 34));
+                    embed.WithTitle($":worried: {título}")
+                        .WithColor(new Color(192, 57, 43));
                     break;
                 case EmbedMessageType.Confused:
-                    embed.WithColor(new Color(255, 191, 0));
-                    embed.WithThumbnailUrl("https://i.imgur.com/QpG1cTI.gif");
-                    //embed.WithThumbnailUrl("https://media3.giphy.com/media/CaiVJuZGvR8HK/giphy.gif");
+                    embed.WithTitle($":thinking: {título}")
+                        .WithColor(new Color(255, 191, 0));
                     break;
                 case EmbedMessageType.AccessDenied:
-                    embed.WithColor(new Color(192, 57, 43));
-                    embed.WithThumbnailUrl("https://vignette.wikia.nocookie.net/undertale-rp/images/0/0d/Access_Denied.png");
+                    embed.WithTitle($":no_entry_sign: {título}").
+                        WithColor(new Color(192, 57, 43));
                     break;
                 case EmbedMessageType.Warning:
-                    embed.WithColor(new Color(255, 191, 0));
-                    embed.WithThumbnailUrl("https://images.emojiterra.com/twitter/512px/26a0.png");
+                    embed.WithTitle($":warning: {título}")
+                        .WithColor(new Color(255, 191, 0));
                     break;
                 case EmbedMessageType.GoldGain:
-                    embed.WithColor(new Color(244, 217, 66));
-                    embed.WithThumbnailUrl("https://i.imgur.com/AT7G9N2.png");
+                    embed.WithTitle($":dollar: {título}")
+                        .WithColor(new Color(244, 217, 66));
                     break;
                 case EmbedMessageType.Config:
-                    embed.WithColor(new Color(188, 188, 188));
-                    embed.WithThumbnailUrl("https://images.emojiterra.com/twitter/512px/2699.png");
+                    embed.WithTitle($":wrench: {título}").
+                        WithColor(new Color(188, 188, 188));
+                    break;
+                case EmbedMessageType.GoldLose:
+                    embed.WithTitle($":money_with_wings: {título}").
+                        WithColor(new Color(244, 134, 66));
                     break;
                 default:
                     embed.WithColor(new Color(178, 178, 178));
                     break;
             }
-
-            if (user != null && withAuthor)
+            
+            if (usuário != null && comAutor)
             {
-                embed.WithAuthor(user.Username, user.GetAvatarUrl());
+                var r = new Random();
+                embed.WithAuthor(usuário.Username,
+                    usuário.GetAvatarUrl() ?? $"https://cdn.discordapp.com/embed/avatars/{r.Next(0, 4)}.png");
             }
 
-            if (withTimeStamp)
+            if (comTempo)
             {
                 embed.WithCurrentTimestamp();
             }
 
             return embed;
         }
+
+        internal static Embed CriarEmbedComImagem(string titulo, string imagem, string descrição = null, bool comTempo = false, string rodapé = null, string imagemRodapé = null)
+        {
+            var embed = new EmbedBuilder();
+            embed.WithTitle(titulo).WithImageUrl(imagem);
+            if (descrição != null)
+            {
+                embed.WithDescription(descrição);
+            }
+
+            if (rodapé != null && imagemRodapé != null)
+            {
+                embed.WithFooter(rodapé, imagemRodapé);
+            }
+            else if (rodapé != null)
+            {
+                embed.WithFooter(rodapé);
+            }
+
+            if (comTempo)
+            {
+                embed.WithCurrentTimestamp();
+            }
+
+            var r = new Random();
+            embed.WithColor(new Color(r.Next(0, 255), r.Next(0, 255), r.Next(0, 255)));
+
+            return embed;
+        }
+        
+        internal static Embed CriarEmbedBoasVindas(BoasVindaType tipo, SocketGuildUser usuário)
+        {
+            var emb = new EmbedBuilder();
+            var guildAccount = GuildsMannanger.GetGuild(usuário.Guild);
+            var r = new Random();
+
+            switch (tipo)
+            {
+                #region ChatGeral
+                case BoasVindaType.ChatGeral:
+                    //  Título
+                    if (guildAccount.BoasVindasTitle != null) emb.WithTitle(guildAccount.BoasVindasTitle.Replace("{mencionar}", usuário.Mention));
+
+                    //  Descriçãp
+                    if (guildAccount.BoasVindasDescription != null)
+                        emb.WithDescription(guildAccount.BoasVindasDescription.Replace("{mencionar}", usuário.Mention));
+
+                    //  Imagem
+                    if (guildAccount.BoasVindasUrl != null)
+                        emb.WithImageUrl(guildAccount.BoasVindasUrl);
+
+                    //  Tumb do usuário
+                    if (guildAccount.BoasVindasTumbUsuario)
+                        emb.WithThumbnailUrl(usuário.GetAvatarUrl());
+
+                    //  Data de criação da conta
+                    emb.AddField("Conta criada em",
+                        $"```fix\n{usuário.CreatedAt.Day}/{usuário.CreatedAt.Month}/{usuário.CreatedAt.Year}```");
+                    break;
+                #endregion
+
+                #region Privado
+
+                case BoasVindaType.Pv:
+                    //  Título
+                    if (guildAccount.BoasVindasPvTitle != null)
+                        emb.WithTitle(guildAccount.BoasVindasPvTitle.Replace("{mencionar}", usuário.Mention));
+
+                    //  Descrição
+                    if (guildAccount.BoasVindasPvDescription != null)
+                        emb.WithDescription(guildAccount.BoasVindasPvDescription.Replace("{mencionar}", usuário.Mention));
+
+                    //  Imagem
+                    if (guildAccount.BoasVindasPvUrl != null)
+                        emb.WithImageUrl(guildAccount.BoasVindasPvUrl);
+
+                    //  Tumb do usuário
+                    if (guildAccount.BoasVindasPvTumbUsuario)
+                        emb.WithThumbnailUrl(usuário.GetAvatarUrl());
+
+                    //  Campo 1
+                    if (guildAccount.BoasVindasPvField1Title != null && guildAccount.BoasVindasPvField1Descri != null)
+                        emb.AddField(guildAccount.BoasVindasPvField1Title.Replace("{mencionar}", usuário.Mention), guildAccount.BoasVindasPvField1Descri.Replace("{mencionar}", usuário.Mention));
+
+                    //  Campo 2
+                    if (guildAccount.BoasVindasPvField2Title != null && guildAccount.BoasVindasPvField2Descri != null)
+                        emb.AddField(guildAccount.BoasVindasPvField2Title.Replace("{mencionar}", usuário.Mention), guildAccount.BoasVindasPvField2Descri.Replace("{mencionar}", usuário.Mention));
+
+                    //  Campo 3
+                    if (guildAccount.BoasVindasPvField3Title != null && guildAccount.BoasVindasPvField3Descri != null)
+                        emb.AddField(guildAccount.BoasVindasPvField3Title.Replace("{mencionar}", usuário.Mention), guildAccount.BoasVindasPvField3Descri.Replace("{mencionar}", usuário.Mention));
+
+                    //  Rodapé
+                    if (guildAccount.BoasVindasPvFooter != null)
+                        emb.WithFooter(guildAccount.BoasVindasPvFooter.Replace("{mencionar}", usuário.Mention));
+                    break;
+
+                    #endregion
+            }
+            emb.WithColor(new Color(r.Next(0, 255), r.Next(0, 255), r.Next(0, 255)));
+
+            return emb;
+        }
+
+        internal static Embed CriarEmbedPerfilDivulgador(SocketGuildUser usuário, uint level, uint usos)
+        {
+            var r = new Random();
+            var emb = new EmbedBuilder();
+
+            emb.WithAuthor(usuário.Username,
+                    usuário.GetAvatarUrl() ?? $"https://cdn.discordapp.com/embed/avatars/{r.Next(0, 4)}.png")
+                .WithColor(new Color(r.Next(0, 255), r.Next(0, 255), r.Next(0, 255)))
+                .WithThumbnailUrl(usuário.GetAvatarUrl() ??
+                                  $"https://cdn.discordapp.com/embed/avatars/{usuário.DiscriminatorValue % 5}.png")
+                .AddInlineField("Usuário", $"```md\n[id]({usuário.Id.ToString()})```")
+                .AddInlineField("Nível", $"```fix\n{level}```")
+                .AddInlineField("Convidados", $"```fix\n{usos}```");
+
+            return emb;
+        }
+
+        internal static Embed CriarEmbedBan(SocketGuildUser adm, SocketGuildUser usuário, string razão, bool joke)
+        {
+            var emb = new EmbedBuilder();
+            var gifSelecionado = GifsBans[Global.Rng.Next(0, GifsBans.Length)];
+
+            emb.WithTitle("🚫 Banido")
+                .WithDescription($"{adm.Mention}, baniu ")
+                .WithDescription($"O usuário {usuário.Mention} foi banido.\n" +
+                                 "Razão:\n" +
+                                 $"```{razão}```");
+
+            emb.WithColor(joke ? new Color(66, 134, 244) : new Color(244, 66, 66));
+
+            emb.WithThumbnailUrl(usuário.GetAvatarUrl() ??
+                                 $"https://cdn.discordapp.com/embed/avatars/{usuário.DiscriminatorValue % 5}.png")
+                .WithFooter(adm.Username, adm.GetAvatarUrl())
+                .WithCurrentTimestamp()
+                .WithImageUrl(gifSelecionado);
+
+            return emb;
+        }
+
+        internal static Embed CriarEmbedBanPv(SocketUser usuário, SocketGuild guild, string razão)
+        {
+            var r = new Random();
+            var emb = new EmbedBuilder();
+
+            emb.WithTitle("Notificação de banimento")
+                .WithDescription(
+                    $"Olá, {usuário.Mention}, vim lhe informar de que você foi banido de {guild.Name} pelo seguinte motivo\n```diff\n-{razão}```")
+                .WithThumbnailUrl(usuário.GetAvatarUrl() ?? $"https://cdn.discordapp.com/embed/avatars/{usuário.DiscriminatorValue % 5}.png")
+                .WithColor(new Color(r.Next(0, 255), r.Next(0, 255), r.Next(0, 255)))
+                .WithCurrentTimestamp();
+
+            return emb;
+        }
+
+        internal static string[] GifsBans =
+        {
+            "https://i.imgur.com/nPsetVZ.gif",
+            "https://i.imgur.com/O3DHIA5.gif",
+            "https://i.imgur.com/aspwN41.gif",
+            "https://i.imgur.com/wOwknGW.gif",
+            "https://media.giphy.com/media/qPD4yGsrc0pdm/giphy.gif",
+            "https://media.giphy.com/media/C51woXfgJdug/giphy.gif",
+            "https://i.imgur.com/Z2klJ5W.gif",
+            "https://media.giphy.com/media/MEw0inp5gAlzO/giphy.gif",
+            "https://media.giphy.com/media/825PVJzyHP03K/giphy.gif",
+            "https://i.imgur.com/cwDETTU.gif"
+        };
+
     }
 
-    public enum EmbedMessageType
+    internal enum EmbedMessageType
     {
-        Success = 0,
-        Info = 1,
-        Error = 2,
-        Exception = 3,
-        Confused = 4,
-        AccessDenied = 5,
-        Warning = 6,
-        GoldGain = 7,
-        Config = 8,
+        Success,
+        Info,
+        Error,
+        GoldLose,
+        Confused,
+        AccessDenied,
+        Warning,
+        GoldGain,
+        Config
+    }
+
+    internal enum BoasVindaType
+    {
+        ChatGeral,
+        Pv
     }
 }
