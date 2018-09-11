@@ -2,10 +2,10 @@
 # GitHyperBot :fire:
 Um simples bot de código aberto
 
-Download da versão mais recente: [![Downloads](https://img.shields.io/github/downloads/Hyper1025/GitHyperBot/latest/total.svg)](https://github.com/Hyper1025/GitHyperBot/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Hyper1025/GitHyperBot/latest/total.svg)](https://github.com/Hyper1025/GitHyperBot/releases/latest)
+[![Build status](https://ci.appveyor.com/api/projects/status/ltaq74fwyq0p14b8?svg=true)](https://ci.appveyor.com/project/Hyper1025/githyperbot)
 
 ## Atenção :eyes:
- Ainda em desenvolvimento, até o momento apresenta poucas funções
  > Ainda em desenvolvimento...
 
 ## Requisito :wrench:
