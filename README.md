@@ -6,7 +6,8 @@ Um simples bot de código aberto
 [![Build status](https://ci.appveyor.com/api/projects/status/ltaq74fwyq0p14b8?svg=true)](https://ci.appveyor.com/project/Hyper1025/githyperbot)
 
 ## Meu Servidor
-> Aqui você pode obter suporte, e interagir no servidor :3 [![Discord](https://discordapp.com/api/guilds/460656801696972800/widget.png)](https://discord.gg/Rk9PW9U)
+> Aqui você pode obter suporte, e interagir no servidor :3 
+[![Discord](https://discordapp.com/api/guilds/460656801696972800/widget.png)](https://discord.gg/Rk9PW9U)
 
 ## Atenção :eyes:
  > Ainda em desenvolvimento...
