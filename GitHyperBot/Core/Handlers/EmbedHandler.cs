@@ -1,8 +1,8 @@
 ﻿using System;
 using Discord;
-using Discord.Rest;
 using Discord.WebSocket;
 using GitHyperBot.Core.Databaset.Server;
+using GitHyperBot.Core.Databaset.User;
 
 namespace GitHyperBot.Core.Handlers
 {
@@ -195,7 +195,13 @@ namespace GitHyperBot.Core.Handlers
         internal static Embed CriarEmbedBan(SocketGuildUser adm, SocketGuildUser usuário, string razão, bool joke)
         {
             var emb = new EmbedBuilder();
+            var admAccount = AccountsMananger.GetAccount(adm, adm.Guild);
             var gifSelecionado = GifsBans[Global.Rng.Next(0, GifsBans.Length)];
+
+            if (admAccount.GifBanimento != null)
+            {
+                gifSelecionado = admAccount.GifBanimento;
+            }
 
             emb.WithTitle("🚫 Banido")
                 .WithDescription($"{adm.Mention}, baniu ")

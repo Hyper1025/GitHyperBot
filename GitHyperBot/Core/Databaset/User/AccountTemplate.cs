@@ -24,6 +24,9 @@ namespace GitHyperBot.Core.Databaset.User
         public ulong RegistradosMasculino { get; set; }
         public ulong RegistradosFeminino { get; set; }
 
+        //  GIF Ban
+        public string GifBanimento { get; set; }
+
         //  Xp para sistema de experiência
         public ulong Xp { get; set; }
 

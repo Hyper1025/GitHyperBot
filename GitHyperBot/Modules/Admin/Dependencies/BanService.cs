@@ -2,14 +2,13 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using GitHyperBot.Core.Databaset.User;
 using GitHyperBot.Core.Handlers;
 
 namespace GitHyperBot.Modules.Admin.Dependencies
 {
     public class BanService
     {
-        // TODO: Implementações no sistema de ban (Gifs)
-
         internal static async Task BanirUsuario(SocketGuildUser usuárioBanido, SocketGuildUser moderador, SocketGuild guild, SocketTextChannel canal, string razão)
         {
             try
@@ -31,6 +30,13 @@ namespace GitHyperBot.Modules.Admin.Dependencies
                 EmbedHandler.CriarEmbedBan(moderador,usuárioBanido,razão,false));
             await Task.Delay(10000);
             await m.DeleteAsync();
+        }
+
+        internal static void DefinirMeuGif(SocketUser usuário, SocketGuild guild , string url)
+        {
+            var userAccount = AccountsMananger.GetAccount(usuário, guild);
+            userAccount.GifBanimento = url;
+            AccountsMananger.SaveAccounts();
         }
     }
 }

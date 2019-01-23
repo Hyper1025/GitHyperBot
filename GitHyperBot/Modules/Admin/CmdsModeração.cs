@@ -4,7 +4,9 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using GitHyperBot.Core;
+using GitHyperBot.Core.Config;
 using GitHyperBot.Core.Databaset.Server;
+using GitHyperBot.Core.Databaset.User;
 using GitHyperBot.Core.Handlers;
 using GitHyperBot.Core.Services;
 using GitHyperBot.Modules.Admin.Dependencies;
@@ -14,9 +16,64 @@ namespace GitHyperBot.Modules.Admin
 {
     public class CmdsModeração : ModuleBase<SocketCommandContext>
     {
+        [Command("DefinirGif")]
+        [Summary("Define o seu gif de banimento")]
+        [RequireUserPermission(GuildPermission.BanMembers), RequireBotPermission(GuildPermission.ManageChannels)]
+        [CmdCategory(Categoria = CmdCategory.Moderação)]
+        internal async Task DefinirGifTask(string url)
+        {
+            if (url.EndsWith(".gif"))
+            {
+                BanService.DefinirMeuGif(Context.User, Context.Guild, url);
+                await Context.Channel.SendMessageAsync("", false,
+                    EmbedHandler.CriarEmbedComImagem("Sucesso", url, "Seu gif foi definido com sucesso", true));
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("", false,
+                    EmbedHandler.CriarEmbed("Ops",
+                        "O link não termina com a extenção .gif, por favor confira e tente novamente",
+                        EmbedMessageType.Error, true, Context.User));
+            }
+        }
+
+        [Command("MeuGif")]
+        [Summary("Exibe seu gif de banimento")]
+        [RequireUserPermission(GuildPermission.BanMembers), RequireBotPermission(GuildPermission.ManageChannels)]
+        [CmdCategory(Categoria = CmdCategory.Moderação)]
+        internal async Task MeuGifTask()
+        {
+            var admAccount = AccountsMananger.GetAccount(Context.User, Context.Guild);
+
+            if (admAccount.GifBanimento == null)
+            {
+                await Context.Channel.SendMessageAsync("", false, EmbedHandler.CriarEmbed("É...", $"Parece que você não definiu o seu gif de banimento, define ele aí... É só usar ```{Config.Bot.CmdPrefix}DefinirGif```", EmbedMessageType.Info));
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("", false,
+                    EmbedHandler.CriarEmbedComImagem("Esse é o seu gif de banimento", admAccount.GifBanimento, null,
+                        true, Context.User.Username, Context.User.GetAvatarUrl()));
+            }
+        }
+
+        [Command("RemoverMeuGif")]
+        [Summary("Exibe seu gif de banimento")]
+        [RequireUserPermission(GuildPermission.BanMembers), RequireBotPermission(GuildPermission.ManageChannels)]
+        [CmdCategory(Categoria = CmdCategory.Moderação)]
+        internal async Task RemoverMeuGifTask()
+        {
+            var admAccount = AccountsMananger.GetAccount(Context.User, Context.Guild);
+            admAccount.GifBanimento = null;
+            AccountsMananger.SaveAccounts();
+
+            await Context.Channel.SendMessageAsync("", false, EmbedHandler.CriarEmbed("Prontinho...", $"Seu gif de banimento foi removido", EmbedMessageType.Success));
+        }
+
+
         [Command("Lock")]
         [Summary("Bloqueia o envio de mensagens do canal atual para o grupo everyone")]
-        [RequireUserPermission(GuildPermission.ManageChannels), RequireUserPermission(GuildPermission.ManageChannels)]
+        [RequireUserPermission(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
         [CmdCategory(Categoria = CmdCategory.Moderação)]
         internal async Task LockTask()
         {
@@ -36,7 +93,7 @@ namespace GitHyperBot.Modules.Admin
 
         [Command("Unlock")]
         [Summary("Desbloqueia o envio de mensagens do canal atual para o grupo everyone")]
-        [RequireUserPermission(GuildPermission.ManageChannels), RequireUserPermission(GuildPermission.ManageChannels)]
+        [RequireUserPermission(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
         [CmdCategory(Categoria = CmdCategory.Moderação)]
         internal async Task UnlockTask()
         {
