@@ -4,7 +4,9 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using GitHyperBot.Core;
+using GitHyperBot.Core.Databaset.Server;
 using GitHyperBot.Core.Handlers;
+using GitHyperBot.Core.Services;
 using GitHyperBot.Modules.Admin.Dependencies;
 using GitHyperBot.Modules.Help.Dependencies;
 
@@ -12,6 +14,46 @@ namespace GitHyperBot.Modules.Admin
 {
     public class CmdsModeração : ModuleBase<SocketCommandContext>
     {
+        [Command("Lock")]
+        [Summary("Bloqueia o envio de mensagens do canal atual para o grupo everyone")]
+        [RequireUserPermission(GuildPermission.ManageChannels), RequireUserPermission(GuildPermission.ManageChannels)]
+        [CmdCategory(Categoria = CmdCategory.Moderação)]
+        internal async Task LockTask()
+        {
+            var canal = (SocketGuildChannel) Context.Channel;
+
+            //  Setamoms o nome da role
+            const string roleName = "@everyone";
+
+            await canal.AddPermissionOverwriteAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name == roleName),
+                new OverwritePermissions(sendMessages: PermValue.Deny));
+
+            await Context.Channel.SendMessageAsync("Canal Mutado");
+            //  Enviamos o log
+            await Logger.ChatLogTask(Logger.LogType.ChatLock,
+                (SocketTextChannel)Global.Client.GetChannel(GuildsMannanger.GetGuild(Context.Guild).IdChatLog),Context.User, $"<#{Context.Channel.Id}>");
+        }
+
+        [Command("Unlock")]
+        [Summary("Desbloqueia o envio de mensagens do canal atual para o grupo everyone")]
+        [RequireUserPermission(GuildPermission.ManageChannels), RequireUserPermission(GuildPermission.ManageChannels)]
+        [CmdCategory(Categoria = CmdCategory.Moderação)]
+        internal async Task UnlockTask()
+        {
+            var canal = (SocketGuildChannel)Context.Channel;
+
+            //  Setamoms o nome da role
+            const string roleName = "@everyone";
+
+            await canal.AddPermissionOverwriteAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name == roleName),
+                new OverwritePermissions(sendMessages: PermValue.Allow));
+
+            await Context.Channel.SendMessageAsync("Canal Desmutado");
+            //  Enviamos o log
+            await Logger.ChatLogTask(Logger.LogType.ChatUnlock,
+                (SocketTextChannel)Global.Client.GetChannel(GuildsMannanger.GetGuild(Context.Guild).IdChatLog), Context.User, $"<#{Context.Channel.Id}>");
+        }
+
         [Command("Limpar")]
         [Summary("Apaga uma quantidade determinada de mensagens.")]
         [RequireUserPermission(GuildPermission.ManageMessages), RequireBotPermission(ChannelPermission.ManageMessages)]

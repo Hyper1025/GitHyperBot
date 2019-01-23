@@ -94,8 +94,20 @@ namespace GitHyperBot.Core.Services
                             .WithAuthor($"{usuário.Username}#{usuário.Discriminator}", usuário.GetAvatarUrl())
                             .WithCurrentTimestamp();
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(logType), logType, null);
+                case LogType.ChatLock:
+                    emb.WithTitle(":x: Canal Mutado")
+                        .WithDescription(motivo)
+                        .WithColor(new Color(244, 65, 119))
+                        .WithAuthor($"{usuário.Username}#{usuário.Discriminator}", usuário.GetAvatarUrl())
+                        .WithCurrentTimestamp();
+                    break;
+                case LogType.ChatUnlock:
+                    emb.WithTitle(":white_check_mark: Canal Desmutado")
+                        .WithDescription(motivo)
+                        .WithColor(new Color(92, 244, 66))
+                        .WithAuthor($"{usuário.Username}#{usuário.Discriminator}", usuário.GetAvatarUrl())
+                        .WithCurrentTimestamp();
+                    break;
             }
 
             await canalLog.SendMessageAsync("", false, emb);
@@ -182,7 +194,9 @@ namespace GitHyperBot.Core.Services
             UsuárioMutado,
             UsuárioDesmutado,
             Warn,
-            TirarWarn
+            TirarWarn,
+            ChatLock,
+            ChatUnlock
         }
     }
 }

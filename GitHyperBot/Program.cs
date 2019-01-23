@@ -21,7 +21,7 @@ namespace GitHyperBot
 
         internal static void Main()
         {
-            Console.Title = "HyperBot - v1.0";
+            Console.Title = "HyperBot - v1.0.1";
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Inicializando HyperBot...");
 
